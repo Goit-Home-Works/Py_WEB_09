@@ -1,3 +1,4 @@
+
 import json
 
 import scrapy
@@ -19,7 +20,7 @@ class AuthorItem(Item):
 class QuotesSpyder(scrapy.Spider):
     name = "get_quotes"
     allowed_domains = ["quotes.toscrape.com"]
-    start_url = [""https://quotes.toscrape.com/"]
+    start_url = ["https://quotes.toscrape.com/"]
 
     def parse(self, response, **kwargs):
         for q in response.xpath("/html//div[@class='quote']"):
@@ -32,6 +33,9 @@ class QuotesSpyder(scrapy.Spider):
                    .follow(url=self.start_url[0] + q.xpath("span/a/@href")
                            .get(), callback=self.parse_author))
         next_link = response.xpath("/html//li[@class='next']/a/@href").get()
+        if next_link:
+            yield scrapy.Request(self.start_url[0] + next_link)
+            
 
     def parse_author(self, response, **kwargs):
         content = response.xpath("/html//div/[@class='author-details']")
