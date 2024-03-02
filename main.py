@@ -10,7 +10,7 @@ from src.DB.connect import connect_mongoDb
 from src.DB.seed_to_db import seeds
 
 
-json_dest = Path(__file__).joinpath("src").parent.joinpath("data")
+json_dest = Path(__file__).resolve().parent.joinpath("src").joinpath("data")
 
 
 class QuoteItem(Item):
@@ -41,6 +41,7 @@ class QuotesAuthorPipeline:
                     "description": adapter.get("description"),
                 }
             )
+            logging.debug(f"Added author: {adapter.get('fullname')}")
         elif "quote" in adapter.keys():
             self.quotes.append(
                 {
@@ -49,6 +50,7 @@ class QuotesAuthorPipeline:
                     "quote": adapter.get("quote"),
                 }
             )
+            logging.debug(f"Added quote by {adapter.get('author')}")
         return item
 
     def write_json_file(self, data: list[dict], json_path: Path):
@@ -76,10 +78,6 @@ class QuotesAuthorPipeline:
 
 class QuotesAuthorSpider(scrapy.Spider):
     name = "quotes_authors"
-    # custom_settings = {
-    #     "FEED_FORMAT": "json",
-    #     "FEED_URI": str(json_dest.joinpath(f"{name}.json")),
-    # }
     custom_settings = {"ITEM_PIPELINES": {QuotesAuthorPipeline: 300}}
     allowed_domains = ["quotes.toscrape.com"]
     start_urls = ["https://quotes.toscrape.com"]
@@ -96,10 +94,11 @@ class QuotesAuthorSpider(scrapy.Spider):
             yield response.follow(
                 url=self.start_urls[0] + author_link, callback=self.nested_parse_author
             )
-
+            
         next_link = response.xpath("//li[@class='next']/a/@href").get()
         if next_link:
             yield scrapy.Request(url=self.start_urls[0] + next_link)
+            # yield scrapy.Request(url=response.urljoin(next_link))
 
     def nested_parse_author(self, response):
         author = response.xpath("/html//div[@class='author-details']")
@@ -125,7 +124,7 @@ if __name__ == "__main__":
     process = CrawlerProcess()
     logger_pymongo = logging.getLogger("pymongo")
     logger_pymongo.setLevel(logging.ERROR)
-    # run spider
+    # run spider: 
     logger_scrapy = logging.getLogger("scrapy")
     logger_scrapy.setLevel(logging.ERROR)
     logger_urllib = logging.getLogger("urllib3")
