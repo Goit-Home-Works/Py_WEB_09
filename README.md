@@ -1,21 +1,33 @@
 
 ## Implementation:
 
+This project uses Python 3.11 and the following libraries:
+
 
 use version 3.11....python3.12 doesn't work...
 
-parse.py - bs4
+- `parse.py`: Uses BeautifulSoup4 (`bs4`) for parsing HTML.
+- `main.py`: Uses Scrapy for web scraping.
 
-main.py - scrapy
+### Prerequisites
 
+- Python 3.11
+- Git
 
-try
+### Setup
+
+To run the `parse.py` script, use the following command:
+
 ```bash
-    python3 parse.py
+python3.11 parse.py 
+```
 
-or
+To run the `main.py` script, use the following command:
+
 ```bash
-    python3 main.py
+python3.11 main.py
+```
+
 
 
 ## Домашнє завдання 9
